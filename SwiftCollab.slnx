@@ -1,0 +1,10 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/SwiftCollab.Baseline/SwiftCollab.Baseline.csproj" />
+    <Project Path="src/SwiftCollab.Bench/SwiftCollab.Bench.csproj" />
+    <Project Path="src/SwiftCollab.Core/SwiftCollab.Core.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/SwiftCollab.Tests/SwiftCollab.Tests.csproj" />
+  </Folder>
+</Solution>

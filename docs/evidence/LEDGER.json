@@ -1,0 +1,165 @@
+{
+  "system": "SwiftCollab task and workflow platform (course scenario)",
+  "author": "jdsaire",
+  "created_at": "2026-11-22",
+  "version": "1.0.0",
+  "badges_policy": {
+    "MEASURED": "Run on the machine named in environment, Release build, median of the runs recorded in bench-results.csv.",
+    "SIMULATED": "Extrapolated from a measured value with the stated formula. Never a result.",
+    "ANALYSIS": "Big-O complexity, reasoned from the code; not a measurement."
+  },
+  "entries": [
+    {
+      "metric_id": "M-P1-01",
+      "focus_area": "Part 1",
+      "name": "Insert + search, sorted priorities, n = 100,000",
+      "unit": "ms",
+      "baseline": {
+        "value": 5802,
+        "badge": "MEASURED",
+        "method": "BinaryTree (given) + bench descent",
+        "environment": "Apple M2 · 16 GB · macOS 26.6.2 · .NET 10.0.5 · Release",
+        "date": "2026-11-22",
+        "raw_output_ref": "docs/evidence/bench-results.csv"
+      },
+      "result": {
+        "value": 16.03,
+        "badge": "MEASURED",
+        "method": "AvlTaskTree",
+        "environment": "Apple M2 · 16 GB · macOS 26.6.2 · .NET 10.0.5 · Release",
+        "date": "2026-11-22",
+        "raw_output_ref": "docs/evidence/bench-results.csv"
+      }
+    },
+    {
+      "metric_id": "M-P1-02",
+      "focus_area": "Part 1",
+      "name": "Insert + search, random priorities, n = 100,000",
+      "unit": "ms",
+      "baseline": {
+        "value": 10.38,
+        "badge": "MEASURED",
+        "method": "BinaryTree (given) + bench descent",
+        "environment": "Apple M2 · 16 GB · macOS 26.6.2 · .NET 10.0.5 · Release",
+        "date": "2026-11-22",
+        "raw_output_ref": "docs/evidence/bench-results.csv"
+      },
+      "result": {
+        "value": 24.22,
+        "badge": "MEASURED",
+        "method": "AvlTaskTree",
+        "environment": "Apple M2 · 16 GB · macOS 26.6.2 · .NET 10.0.5 · Release",
+        "date": "2026-11-22",
+        "raw_output_ref": "docs/evidence/bench-results.csv"
+      }
+    },
+    {
+      "metric_id": "M-P2-01",
+      "focus_area": "Part 2",
+      "name": "Enqueue all + dequeue all, n = 20,000",
+      "unit": "ms",
+      "baseline": {
+        "value": 4707,
+        "badge": "MEASURED",
+        "method": "ApiRequestQueue (given)",
+        "environment": "Apple M2 · 16 GB · macOS 26.6.2 · .NET 10.0.5 · Release",
+        "date": "2026-11-22",
+        "raw_output_ref": "docs/evidence/bench-results.csv"
+      },
+      "result": {
+        "value": 2.48,
+        "badge": "MEASURED",
+        "method": "ApiRequestHeap",
+        "environment": "Apple M2 · 16 GB · macOS 26.6.2 · .NET 10.0.5 · Release",
+        "date": "2026-11-22",
+        "raw_output_ref": "docs/evidence/bench-results.csv"
+      }
+    },
+    {
+      "metric_id": "M-P3-01",
+      "focus_area": "Part 3",
+      "name": "Sort random integers, n = 100,000",
+      "unit": "ms",
+      "baseline": {
+        "value": 11370,
+        "badge": "MEASURED",
+        "method": "BubbleSort (given)",
+        "environment": "Apple M2 · 16 GB · macOS 26.6.2 · .NET 10.0.5 · Release",
+        "date": "2026-11-22",
+        "raw_output_ref": "docs/evidence/bench-results.csv"
+      },
+      "result": {
+        "value": 4.55,
+        "badge": "MEASURED",
+        "method": "IntroSorter.Sort",
+        "environment": "Apple M2 · 16 GB · macOS 26.6.2 · .NET 10.0.5 · Release",
+        "date": "2026-11-22",
+        "raw_output_ref": "docs/evidence/bench-results.csv"
+      }
+    },
+    {
+      "metric_id": "M-P3-02",
+      "focus_area": "Part 3",
+      "name": "Sort random integers, n = 1,000,000, parallel option",
+      "unit": "ms",
+      "baseline": {
+        "value": "≈ 1,137,000 (t(100k) × 100)",
+        "badge": "SIMULATED",
+        "method": "t(n) ≈ t(100,000) × (n / 100,000)²",
+        "date": "2026-11-22"
+      },
+      "result": {
+        "value": 18.82,
+        "badge": "MEASURED",
+        "method": "IntroSorter.ParallelSort",
+        "environment": "Apple M2 · 16 GB · macOS 26.6.2 · .NET 10.0.5 · Release",
+        "date": "2026-11-22",
+        "raw_output_ref": "docs/evidence/bench-results.csv"
+      }
+    },
+    {
+      "metric_id": "M-P4-01",
+      "focus_area": "Part 4",
+      "name": "Valid queue, n = 100,000",
+      "unit": "ms",
+      "baseline": {
+        "value": 6.56,
+        "badge": "MEASURED",
+        "method": "TaskExecutor (given)",
+        "environment": "Apple M2 · 16 GB · macOS 26.6.2 · .NET 10.0.5 · Release",
+        "date": "2026-11-22",
+        "raw_output_ref": "docs/evidence/bench-results.csv"
+      },
+      "result": {
+        "value": 31.24,
+        "badge": "MEASURED",
+        "method": "ResilientTaskExecutor",
+        "environment": "Apple M2 · 16 GB · macOS 26.6.2 · .NET 10.0.5 · Release",
+        "date": "2026-11-22",
+        "raw_output_ref": "docs/evidence/bench-results.csv"
+      }
+    },
+    {
+      "metric_id": "M-P4-02",
+      "focus_area": "Part 4",
+      "name": "Course queue: tasks completed of 4 (1 null, 1 failing)",
+      "unit": "tasks",
+      "baseline": {
+        "value": 1,
+        "badge": "MEASURED",
+        "method": "TaskExecutor (given), executor-demo",
+        "environment": "Apple M2 · 16 GB · macOS 26.6.2 · .NET 10.0.5 · Release",
+        "date": "2026-11-22",
+        "raw_output_ref": "docs/evidence/bench-results.csv"
+      },
+      "result": {
+        "value": 2,
+        "badge": "MEASURED",
+        "method": "ResilientTaskExecutor, executor-demo",
+        "environment": "Apple M2 · 16 GB · macOS 26.6.2 · .NET 10.0.5 · Release",
+        "date": "2026-11-22",
+        "raw_output_ref": "docs/evidence/bench-results.csv"
+      }
+    }
+  ]
+}
