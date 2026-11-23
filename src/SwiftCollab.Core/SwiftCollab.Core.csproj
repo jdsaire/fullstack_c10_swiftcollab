@@ -10,4 +10,8 @@
     <InternalsVisibleTo Include="SwiftCollab.Tests" />
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.15" />
+  </ItemGroup>
+
 </Project>
