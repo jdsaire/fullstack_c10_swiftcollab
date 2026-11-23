@@ -84,6 +84,11 @@ public static class Runner
             WarmUp(benchCase, sizes[0]);
             foreach (int size in sizes)
             {
+                if (size > benchCase.MaxSize)
+                {
+                    break;
+                }
+
                 CellResult cell = Measure(benchCase, size, settings);
                 results.Add(cell);
                 onCell?.Invoke(cell);
