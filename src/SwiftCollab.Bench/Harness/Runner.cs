@@ -81,13 +81,16 @@ public static class Runner
         var results = new List<CellResult>();
         foreach (BenchCase benchCase in cases)
         {
-            WarmUp(benchCase, sizes[0]);
-            foreach (int size in sizes)
+            // Sizes run in ascending order; a method never runs, warm-up included, above its size limit.
+            int[] allowed = sizes.Where(size => size <= benchCase.MaxSize).ToArray();
+            if (allowed.Length == 0)
             {
-                if (size > benchCase.MaxSize)
-                {
-                    break;
-                }
+                continue;
+            }
+
+            WarmUp(benchCase, allowed[0]);
+            foreach (int size in allowed)
+            {
 
                 CellResult cell = Measure(benchCase, size, settings);
                 results.Add(cell);

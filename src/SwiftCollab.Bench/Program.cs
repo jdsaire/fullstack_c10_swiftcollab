@@ -48,6 +48,10 @@ public static class Program
             List<CellResult> cells = Runner.Sweep(cases, ladder, settings);
             all.AddRange(cells);
             Console.WriteLine(Report.Table(current, Ladder.Titles[current], cells));
+            foreach (BenchCase limited in cases.Where(c => ladder.Max() > c.MaxSize))
+            {
+                Console.WriteLine($"Not run above {limited.MaxSize:N0} items: {limited.Method} (size limit).");
+            }
         }
 
         if (writeDir is not null)
