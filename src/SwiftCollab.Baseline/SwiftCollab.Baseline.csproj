@@ -1,0 +1,10 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <!-- The course code blocks predate nullable reference types; kept as given. -->
+    <Nullable>disable</Nullable>
+  </PropertyGroup>
+
+</Project>
