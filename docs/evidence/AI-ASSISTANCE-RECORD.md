@@ -150,3 +150,17 @@ Each course part lists prompts under "Request optimizations for". Every prompt w
 - **Prompt**: "Suggesting simple retry logic for failed tasks without requiring complex concurrency."
 - **Suggested**: retry a failed task up to a set number of times (default 2), with a growing wait between attempts (exponential backoff); alternatively, a retry library such as Polly.
 - **Decision**: fixed retry count **kept**. Backoff **changed**: on a single queue a wait also delays every task behind it, so retries run at once. Retry library **rejected as unnecessary**: the page asks for simple logic without complex concurrency.
+
+---
+
+## Tally
+
+| Part | Prompts | Suggestions changed | Suggestions rejected | Of those rejected, inaccurate |
+|---|---:|---:|---:|---:|
+| 1 · Binary tree | 5 | 3 | 4 | 1 (byte-sized height saves no memory) |
+| 2 · Priority queue | 6 | 1 | 5 | 1 (binary-search insert stays O(n)) |
+| 3 · Sort | 5 | 2 | 4 | 0 |
+| 4 · Task executor | 5 | 2 | 3 | 0 |
+| **Total** | **21** | **8** | **16** | **2** |
+
+One changed suggestion was also inaccurate as stated: AI-14 described plain quicksort as O(n log n), which holds only on average.
