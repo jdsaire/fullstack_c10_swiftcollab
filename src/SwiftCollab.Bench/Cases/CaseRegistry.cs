@@ -7,6 +7,7 @@ public static class CaseRegistry
 {
     public static IReadOnlyList<BenchCase> ForPart(int part) => part switch
     {
+        1 => Part1Cases.All,
         _ => [],
     };
 }
