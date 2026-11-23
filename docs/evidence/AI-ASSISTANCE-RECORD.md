@@ -21,6 +21,7 @@ Each course part lists prompts under "Request optimizations for". Every prompt w
 ### S-02 · Course page notes
 - Part 1 shows its "review the following code" sentence twice; Part 2 has no Step 3 heading; Part 4's page title ("Optimizing Data Structures With the LLM") differs from its subject (debugging task execution). The run follows each page's evident intent.
 - Indentation in every code block is reconstructed from the page editor; it does not change behaviour.
+- Part 2's optimization prompts are typed on the page as lines starting with "- "; they are quoted here without that marker.
 - Part 1's block has no `Main` and no `using System;`. It compiles as library code with the project's implicit usings.
 
 ### S-03 · Bench helper for Part 1
@@ -55,3 +56,38 @@ Each course part lists prompts under "Request optimizations for". Every prompt w
 - **Suggested**: (1) one node per priority with a task list; (2) stop rebalancing when an insert only adds a task to an existing priority; (3) return entries from the walk instead of printing; (4) store the height in a byte to shrink each node.
 - **Decision**: (1) and (3) **kept**. (2) **changed**: the node with the repeated priority returns at once, but the levels above it still recompute their heights (a constant step per level). (4) **rejected as inaccurate**: on 64-bit .NET an object's size rounds up to 8 bytes, and the priority and height (4 bytes each) already share one 8-byte slot, so a byte height leaves the node the same size.
 - **Note for the report**: the refined node also stores the task text and a list, so it allocates more memory per insert than the original's bare integer node. The bench reports allocated bytes beside time.
+
+---
+
+## Part 2 · Priority queue (`src/SwiftCollab.Core/Part2/ApiRequestHeap.cs`)
+
+### AI-06 · Analyze the queue
+- **Prompt**: "Prompt an LLM (e.g., Microsoft Copilot) to analyze the provided priority queue implementation and suggest improvements."
+- **Suggested**: (1) every enqueue re-sorts the whole list, O(n log n) per insert; (2) every dequeue calls `RemoveAt(0)`, which shifts all remaining requests, O(n); (3) `List.Sort` is not stable, so requests with equal priority can leave out of arrival order; (4) the list is not safe to share across threads; (5) `Priority` has a public setter, so a queued request can change priority and break the order; (6) dequeue returns null on an empty queue, which callers can miss.
+- **Evaluation**: all six **kept** as the work list. (5) became an immutable `ApiRequest` record; (3) became an arrival number that breaks ties; (6) became `TryDequeue`, with `Dequeue()` kept for callers that expect null.
+
+### AI-07 · Replace List.Sort with a min-heap
+- **Prompt**: "Replacing List.Sort() with a Min-Heap (Binary Heap Implementation) to improve efficiency."
+- **Suggested**: an array-backed binary min-heap with sift-up and sift-down; alternatively, use the framework's `PriorityQueue<TElement, TPriority>`.
+- **Decision**: own heap **kept** (the activity asks for the heap itself). Framework queue **rejected for the implementation** and kept as a reference row in the bench: it has no lock and no first-in, first-out order among equal priorities, so it is not a like-for-like replacement.
+
+### AI-08 · Insertion from O(n log n) to O(log n)
+- **Prompt**: "Reducing insertion complexity from O(n log n) to O(log n) by using a binary heap."
+- **Suggested**: append at the end of the array and sift up; alternatively, keep the list sorted and insert at the slot found by binary search.
+- **Decision**: sift-up **kept** (at most log2(n) moves). Binary-search insertion **rejected as inaccurate for the goal**: finding the slot is O(log n), but inserting into a list shifts every later element, so the insert stays O(n).
+
+### AI-09 · Dequeue from O(n) to O(log n)
+- **Prompt**: "Refactoring the Dequeue operation to run in O(log n) instead of O(n)."
+- **Suggested**: take the root, move the last entry to the top, sift it down; alternatively, keep the list sorted in reverse and remove from the end.
+- **Decision**: sift-down **kept**. Reverse-sorted list **rejected**: dequeue becomes O(1), but every enqueue still sorts, so the original bottleneck stays.
+
+### AI-10 · Batch enqueue
+- **Prompt**: "Adding bulk processing support (batch enqueue)."
+- **Suggested**: `EnqueueRange` that takes the lock and resizes the array once, then rebuilds the heap bottom-up in O(n + k).
+- **Decision**: **changed**: one lock and one resize kept; the bottom-up rebuild is used only when the batch is at least as large as the queue. For a small batch into a large queue, each new request is sifted up (O(k log n)), which is cheaper than rebuilding everything.
+
+### AI-11 · Thread safety
+- **Prompt**: "Implementing thread-safe request handling for concurrent processing."
+- **Suggested**: (1) one lock around every operation, using .NET's `Lock` type; (2) a reader-writer lock so `Count` and `TryPeek` can run in parallel; (3) a lock-free design with one concurrent queue per priority level.
+- **Decision**: (1) **kept**. (2) **rejected as unnecessary**: those reads take nanoseconds, and a plain lock is simpler and cheaper when uncontended. (3) **rejected as unnecessary**: harder to get right, and it limits priorities to a fixed set of levels; beyond a learner-level refinement.
+- **Verified by**: two concurrency tests (4 producers enqueuing batches while 4 consumers dequeue, 40,000 requests; 8 threads enqueuing 40,000 single requests): no request lost or duplicated, order intact.
