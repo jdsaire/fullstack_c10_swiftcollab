@@ -10,6 +10,7 @@ public static class CaseRegistry
         1 => Part1Cases.All,
         2 => Part2Cases.All,
         3 => Part3Cases.All,
+        4 => Part4Cases.All,
         _ => [],
     };
 }

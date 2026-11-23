@@ -10,6 +10,7 @@ namespace SwiftCollab.Bench;
 /// dotnet run -c Release --project src/SwiftCollab.Bench -- --part 1 --size 30000   one quick row
 /// dotnet run -c Release --project src/SwiftCollab.Bench -- --smoke           smallest size per part
 /// dotnet run -c Release --project src/SwiftCollab.Bench -- --write docs/evidence   sweep + files
+/// dotnet run -c Release --project src/SwiftCollab.Bench -- executor-demo     Part 4, course tasks
 /// </code>
 /// </summary>
 public static class Program
@@ -22,6 +23,12 @@ public static class Program
         {
             Console.Error.WriteLine("Timings are only reported from a Release build: add -c Release.");
             return 2;
+        }
+
+        if (args.Contains("executor-demo"))
+        {
+            ExecutorDemo.Run();
+            return 0;
         }
 
         int? part = IntArg(args, "--part");
