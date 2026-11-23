@@ -34,13 +34,16 @@ public static class Report
         var sb = new StringBuilder("part,workload,method,role,size,median_ms,runs,allocated_bytes,capped\n");
         foreach (CellResult c in cells)
         {
-            sb.Append(Inv, $"{c.Case.Part},{c.Case.Workload},{c.Case.Method},{c.Case.Role},{c.Size},");
+            sb.Append(Inv, $"{c.Case.Part},{Quote(c.Case.Workload)},{Quote(c.Case.Method)},{c.Case.Role},{c.Size},");
             sb.Append(c.Capped ? "" : c.MedianMs.ToString("0.0000", Inv));
             sb.Append(Inv, $",{c.Runs},{(c.Capped ? "" : c.MedianAllocatedBytes.ToString(Inv))},{c.Capped}\n");
         }
 
         return sb.ToString();
     }
+
+    private static string Quote(string field) =>
+        field.Contains(',') || field.Contains('"') ? $"\"{field.Replace("\"", "\"\"")}\"" : field;
 
     private static string Format(double ms) =>
         ms < 1 ? ms.ToString("0.000", Inv) : ms < 100 ? ms.ToString("0.00", Inv) : ms.ToString("N0", Inv);
