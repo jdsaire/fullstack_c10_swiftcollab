@@ -120,3 +120,33 @@ Each course part lists prompts under "Request optimizations for". Every prompt w
 - **Prompt**: "Supporting parallel sorting to improve performance for large datasets."
 - **Suggested**: sort the two sides of each partition at the same time with `Parallel.Invoke`; alternatively, PLINQ's `OrderBy`.
 - **Decision**: `Parallel.Invoke` **changed**: the suggestion forked at every level; the refined sort forks only for ranges of at least 65,536 items and only for the first log2(cores) + 1 levels, so task overhead stays small. PLINQ **rejected**: it builds a new sorted sequence instead of sorting in place, which undoes AI-15.
+
+---
+
+## Part 4 · Task executor (`src/SwiftCollab.Core/Part4/ResilientTaskExecutor.cs`)
+
+### AI-17 · Analyze the executor
+- **Prompt**: "Prompt an LLM (e.g., Microsoft Copilot) to analyze the provided task execution code and identify potential issues."
+- **Suggested**: (1) any exception inside `ExecuteTask` escapes `ProcessTasks` and ends the program, so the null task stops "Fail Task" and "Task 2" from ever running; (2) a null task is accepted into the queue and only fails when processed; (3) both failures throw a bare `Exception`, so callers cannot tell them apart; (4) messages go straight to the console, with no level and no record of the error; (5) no way to retry a task that failed for a passing reason.
+- **Evaluation**: all five **kept** as the work list. Confirmed by running the course code: it prints Task 1, then stops on "Task is null" (exit code 134).
+
+### AI-18 · Exception handling
+- **Prompt**: "Implementing proper exception handling to prevent crashes when tasks fail."
+- **Suggested**: wrap each task in its own try/catch so the loop continues; catch only a new `TaskExecutionException`; return a summary of what happened.
+- **Decision**: per-task try/catch, `TaskExecutionException` and the summary **kept**. Catching only the custom exception **changed**: the executor catches any exception a task throws, because any other error would otherwise stop the queue just as the original did. A test runs a task that throws an unrelated exception and checks that the next task still runs.
+
+### AI-19 · Null checks
+- **Prompt**: "Adding null checks to ensure the program does not break on invalid input."
+- **Suggested**: check for null inside `ExecuteTask` and skip; alternatively, refuse it in `AddTask`.
+- **Decision**: refusal in `AddTask` **kept**, extended to blank names: invalid input is stopped before it reaches the queue, logged once as a warning and counted as "rejected" in the summary. The check inside `ExecuteTask` **rejected as unnecessary** once nothing invalid can be queued.
+
+### AI-20 · Logging
+- **Prompt**: "Introducing logging to track errors instead of just printing messages."
+- **Suggested**: use `ILogger` from `Microsoft.Extensions.Logging`: warnings for rejected input and retries, an error with the exception for a final failure, information for completed tasks; alternatively, a third-party logging library.
+- **Decision**: `ILogger` **kept** (the standard .NET interface; the library depends only on its abstractions, and the demo uses the console logger). Third-party library **rejected as unnecessary** for one class.
+- **Measured cost, reported**: on a queue of valid tasks the refined executor is slower than the original, because it formats structured log messages and keeps a summary. The bench shows the figures.
+
+### AI-21 · Simple retry
+- **Prompt**: "Suggesting simple retry logic for failed tasks without requiring complex concurrency."
+- **Suggested**: retry a failed task up to a set number of times (default 2), with a growing wait between attempts (exponential backoff); alternatively, a retry library such as Polly.
+- **Decision**: fixed retry count **kept**. Backoff **changed**: on a single queue a wait also delays every task behind it, so retries run at once. Retry library **rejected as unnecessary**: the page asks for simple logic without complex concurrency.
