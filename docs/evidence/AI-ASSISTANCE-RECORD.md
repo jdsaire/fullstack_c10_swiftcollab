@@ -91,3 +91,32 @@ Each course part lists prompts under "Request optimizations for". Every prompt w
 - **Suggested**: (1) one lock around every operation, using .NET's `Lock` type; (2) a reader-writer lock so `Count` and `TryPeek` can run in parallel; (3) a lock-free design with one concurrent queue per priority level.
 - **Decision**: (1) **kept**. (2) **rejected as unnecessary**: those reads take nanoseconds, and a plain lock is simpler and cheaper when uncontended. (3) **rejected as unnecessary**: harder to get right, and it limits priorities to a fixed set of levels; beyond a learner-level refinement.
 - **Verified by**: two concurrency tests (4 producers enqueuing batches while 4 consumers dequeue, 40,000 requests; 8 threads enqueuing 40,000 single requests): no request lost or duplicated, order intact.
+
+---
+
+## Part 3 · Sort (`src/SwiftCollab.Core/Part3/IntroSorter.cs`)
+
+### AI-12 · Analyze the sort
+- **Prompt**: "Prompt an LLM (e.g., Microsoft Copilot) to analyze the provided sorting algorithm and identify inefficiencies."
+- **Suggested**: (1) two nested loops run in full whatever the input, O(n²) comparisons even on a sorted array; (2) a quick fix: stop when a pass makes no swap; (3) the sort already works in place, O(1) extra memory, which any replacement should keep.
+- **Evaluation**: (1) and (3) **kept**. (2) **rejected as unnecessary**: it only helps input that is already nearly sorted and leaves the O(n²) worst case, and the algorithm is being replaced anyway.
+
+### AI-13 · Replace bubble sort
+- **Prompt**: "Replacing Bubble Sort with a more efficient sorting algorithm such as Quick Sort or Merge Sort."
+- **Suggested**: merge sort (stable, O(n log n) in every case) or quicksort; alternatively, call the framework's `Array.Sort`.
+- **Decision**: quicksort **kept**. Merge sort **rejected**: it needs a second buffer as large as the input, which conflicts with the in-place requirement of AI-15, and stability adds nothing when sorting plain integers. `Array.Sort` **rejected for the implementation** (the activity asks for the refactor itself) and kept as a reference row in the bench.
+
+### AI-14 · O(n²) to O(n log n)
+- **Prompt**: "Reducing time complexity from O(n²) to O(n log n)."
+- **Suggested**: quicksort, described as O(n log n); insertion sort for small partitions.
+- **Decision**: **changed**: quicksort is O(n log n) on average but O(n²) in its worst case, so the description was inaccurate as stated. The refined sort switches to heapsort when partitioning goes deeper than 2·log2(n) (introsort), which keeps the worst case at O(n log n). Insertion sort for partitions of 16 or fewer items **kept**.
+
+### AI-15 · In-place sorting
+- **Prompt**: "Optimizing space complexity by using an in-place sorting method if applicable."
+- **Suggested**: partition inside the array around a median-of-three pivot; recurse into the smaller side and loop on the larger one.
+- **Decision**: both **kept**. The call stack stays at most log2(n) deep, and the partition stops on equal values, so duplicate-heavy arrays still split near the middle.
+
+### AI-16 · Parallel sorting
+- **Prompt**: "Supporting parallel sorting to improve performance for large datasets."
+- **Suggested**: sort the two sides of each partition at the same time with `Parallel.Invoke`; alternatively, PLINQ's `OrderBy`.
+- **Decision**: `Parallel.Invoke` **changed**: the suggestion forked at every level; the refined sort forks only for ranges of at least 65,536 items and only for the first log2(cores) + 1 levels, so task overhead stays small. PLINQ **rejected**: it builds a new sorted sequence instead of sorting in place, which undoes AI-15.
